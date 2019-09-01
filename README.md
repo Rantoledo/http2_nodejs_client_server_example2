@@ -15,7 +15,7 @@ Deployment instructions:
 # client side:
 6. go to client directory, and execute `npm init`, then install 'yargs', 'lodash' and 'bluebird'.
 7. create directory 'cert' next to client.js and place 'certificate.pem' there.
-8. execute `node client.js --serverIP=<ip> --port=<server-port> --srcFolder=<path-to-directory-with-files> --trgFolder=<relative-path-to-target-folder-client-side> --concurrency=<number> --servername=<your-server-name>` do download directory with files from server.
+8. execute `node client.js --serverIP=<ip> --port=<server-port> --srcFolder=<absolute-path-to-directory-with-files-server-side> --trgFolder=<relative-path-to-target-folder-client-side> --concurrency=<number> --servername=<your-server-name>` do download directory with files from server.
   
 client arguments (all required):  
 serverIP: ip of the server you deployed.  
