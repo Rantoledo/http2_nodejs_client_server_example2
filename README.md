@@ -1,6 +1,6 @@
 # http2_nodejs_client_server_example2
 
-This repo is for reproducing an node js http2 bug: 
+This repo is for reproducing an node js http2 bug: https://github.com/nodejs/node/issues/29393
 
 
 Deployment instructions:
