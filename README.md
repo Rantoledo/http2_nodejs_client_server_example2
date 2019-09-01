@@ -10,7 +10,7 @@ Deployment instructions:
 2. create certificate and key using open ssl (name them 'certificate.pem' and 'key.pem').
 3. create directory 'cert' next to server.js, and place 'certificate.pem' and 'key.pem' in it.
 4. in server directory, init npm ('npm init'), and install 'yargs' ('npm i yargs') and 'mime-types'.
-5. execute 'node server.js --port=<port-number>' to deploy the server. 
+5. execute 'node server.js --port='<port-number>' to deploy the server. 
   
 # client side:
 6. go to client directory, and execute 'npm init', then install 'yargs', 'lodash' and 'bluebird'.
