@@ -26,7 +26,8 @@ function connectToServer(serverIP, port) {
     return http2.connect(`https://${serverIP}:${port}`, {
         peerMaxConcurrentStreams: 500,
         ca: readFileSync('./cert/certificate.pem'),
-        servername: argv.servername
+        servername: argv.servername,
+        MaxSessionMemory: 1000
     });
 }
 
