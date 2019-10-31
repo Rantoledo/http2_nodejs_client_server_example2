@@ -56,7 +56,8 @@ function initServer(port){
     const server = http2.createSecureServer({
         peerMaxConcurrentStreams: 500,
         key: readFileSync('./cert/key.pem'),
-        cert: readFileSync('./cert/certificate.pem')
+        cert: readFileSync('./cert/certificate.pem'),
+        MaxSessionMemory: 1000
     });
     server.listen(port);
     console.log(`Server deployed. Listening on port number: ${port}`);
