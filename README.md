@@ -1,7 +1,4 @@
-# http2_nodejs_client_server_example2
-
-This repo is for reproducing an node js http2 bug: https://github.com/nodejs/node/issues/29393
-
+# http2_nodejs_client_server_example
 
 Deployment instructions:
 1. clone files and put server and client on a different linux machines.
