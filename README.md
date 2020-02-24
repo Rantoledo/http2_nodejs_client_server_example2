@@ -7,12 +7,12 @@ Deployment instructions:
 2. create certificate and key using open ssl (name them 'certificate.pem' and 'key.pem').
 3. create directory 'cert' next to server.js, and place 'certificate.pem' and 'key.pem' in it.
 4. in server directory, init npm (`npm init`), and install 'yargs' (`npm i yargs`) and 'mime-types'.
-5. execute `node server.js --port=<port-number>` to deploy the server. 
+5. execute `node server.js --port=<port-number> --maxMem=<number-of-megabytes-memory-for-the-session>` to deploy the server. 
   
 # client side:
 6. go to client directory, and execute `npm init`, then install 'yargs', 'lodash' and 'bluebird'.
 7. create directory 'cert' next to client.js and place 'certificate.pem' there.
-8. execute `node client.js --serverIP=<ip> --port=<server-port> --srcFolder=<absolute-path-to-directory-with-files-server-side> --trgFolder=<relative-path-to-target-folder-client-side> --concurrency=<number> --servername=<your-server-name>` do download directory with files from server.
+8. execute `node client.js --serverIP=<ip> --port=<server-port> --srcFolder=<absolute-path-to-directory-with-files-server-side> --trgFolder=<relative-path-to-target-folder-client-side> --concurrency=<number> --servername=<your-server-name> --oneSession=<true/false> (true - if you want the client to use one session for all the files, false- client will initiate new one for each file)` to download directory with files from server.
   
 client arguments (all required):  
 serverIP: ip of the server you deployed.  
