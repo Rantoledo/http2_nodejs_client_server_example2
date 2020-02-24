@@ -1,8 +1,9 @@
 const http2 = require('http2');
-const { openSync, closeSync, readFileSync } = require('fs');
+const { openSync, closeSync, readFileSync, lstatSync } = require('fs');
 const { readdir, lstat } = require('fs').promises;
 const mimeType = require('mime-types');
 const argv = require('yargs').argv;
+const { join } = require('path');
 
 const TYPE_DIRECTORY = 'DIRECTORY';
 const TYPE_FILE = 'FILE';
@@ -16,7 +17,7 @@ const {
     HTTP2_METHOD_GET
 } = http2.constants;
 
-process.env.UV_THREADPOOL_SIZE = 128;
+process.env.UV_THREADPOOL_SIZE = 1024;
 
 
 process.on('uncaughtException', err => console.error('Got uncaught exception', err));
@@ -57,19 +58,26 @@ function initServer(port){
         peerMaxConcurrentStreams: 500,
         key: readFileSync('./cert/key.pem'),
         cert: readFileSync('./cert/certificate.pem'),
-        MaxSessionMemory: 1000
+        MaxSessionMemory: argv.maxMem
     });
     server.listen(port);
     console.log(`Server deployed. Listening on port number: ${port}`);
     return server;
 }
 
+function stat(path, entry) {
+    const stats = lstatSync(join(path, entry));
+    const statObj = {
+        path: entry,
+        size: stats.size
+    };
+    return statObj;
+}
+
 async function dispatch(stream, headers) {
 
     const method = headers[HTTP2_HEADER_METHOD];
-    console.log(`method received from client: ${method}`);
     if (method === HTTP2_METHOD_GET) {
-
         // get path type
         const {[HTTP2_HEADER_PATH]: path} = headers;
         const stats = await lstat(path);
@@ -78,24 +86,22 @@ async function dispatch(stream, headers) {
         switch (type) {
             case TYPE_DIRECTORY: { // if type is directory, list entries and send back
                 const entries = await readdir(path);
-                console.log(`Files list: ${JSON.stringify(entries)}`);
+                const objects = entries.map(entry => stat(path, entry));
                 stream.respond({
                     [HTTP2_HEADER_STATUS]: 200
                 });
-                stream.end(JSON.stringify(entries));
+                stream.end(JSON.stringify(objects));
                 break;
             }
 
             case TYPE_FILE: { // if type is file, download it.
                 const contentType = mimeType.lookup(path) || 'application/octet-stream';
-                console.log(`file: ${path}, contentType: ${contentType}`);
                 const fileHandle = openSync(path, 'r');
                 stream.respondWithFD(fileHandle, {
                     [HTTP2_HEADER_CONTENT_TYPE]: contentType,
                     [HTTP2_HEADER_STATUS]: 200
                 });
                 stream.on('close', () => {
-                    console.log(`got close from client! closing fd`);
                     closeSync(fileHandle);
                 });
                 break;
