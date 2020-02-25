@@ -1,9 +1,8 @@
 const http2 = require('http2');
-const { openSync, closeSync, readFileSync, lstatSync } = require('fs');
-const { readdir, lstat } = require('fs').promises;
+const { readFileSync } = require('fs');
+const { readdir, lstat, open } = require('fs').promises;
 const mimeType = require('mime-types');
 const argv = require('yargs').argv;
-const { join } = require('path');
 
 const TYPE_DIRECTORY = 'DIRECTORY';
 const TYPE_FILE = 'FILE';
@@ -65,15 +64,6 @@ function initServer(port){
     return server;
 }
 
-function stat(path, entry) {
-    const stats = lstatSync(join(path, entry));
-    const statObj = {
-        path: entry,
-        size: stats.size
-    };
-    return statObj;
-}
-
 async function dispatch(stream, headers) {
 
     const method = headers[HTTP2_HEADER_METHOD];
@@ -86,23 +76,22 @@ async function dispatch(stream, headers) {
         switch (type) {
             case TYPE_DIRECTORY: { // if type is directory, list entries and send back
                 const entries = await readdir(path);
-                const objects = entries.map(entry => stat(path, entry));
                 stream.respond({
                     [HTTP2_HEADER_STATUS]: 200
                 });
-                stream.end(JSON.stringify(objects));
+                stream.end(JSON.stringify(entries));
                 break;
             }
 
             case TYPE_FILE: { // if type is file, download it.
                 const contentType = mimeType.lookup(path) || 'application/octet-stream';
-                const fileHandle = openSync(path, 'r');
-                stream.respondWithFD(fileHandle, {
+                const fileHandle = await open(path, 'r');
+                stream.respondWithFD(fileHandle.fd, {
                     [HTTP2_HEADER_CONTENT_TYPE]: contentType,
                     [HTTP2_HEADER_STATUS]: 200
                 });
-                stream.on('close', () => {
-                    closeSync(fileHandle);
+                stream.on('close', async () => {
+                    await fileHandle.close();
                 });
                 break;
             }
