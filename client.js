@@ -32,7 +32,8 @@ function connectToServer(serverIP, port) {
     return http2.connect(`https://${serverIP}:${port}`, {
         peerMaxConcurrentStreams: 500,
         ca: readFileSync('./cert/certificate.pem'),
-        servername: argv.servername
+        servername: argv.servername,
+        maxSessionMemory: argv.maxMem
     });
 }
 
@@ -95,7 +96,6 @@ async function getSecureReadStream(client, path) {
         [HTTP2_HEADER_PATH]: path,
         [HTTP2_HEADER_METHOD]: HTTP2_METHOD_GET,
     });
-
     serverStream.on('error', err => {
         console.error('Request had an error:', err);
         serverStream.close();
@@ -125,8 +125,8 @@ async function main() {
         });
         await Promise.map(entriesArray, async entry => {
             try {
-                const readStream = await getSecureReadStream(client, gracefullJoin(argv.srcFolder, entry.path));
-                const writeStream = createWriteStream(gracefullJoin(argv.trgFolder, entry.path));
+                const readStream = await getSecureReadStream(client, gracefullJoin(argv.srcFolder, entry));
+                const writeStream = createWriteStream(gracefullJoin(argv.trgFolder, entry));
                 await pipe(readStream, writeStream);
                 readStream.close();
                 writeStream.close();
@@ -143,8 +143,8 @@ async function main() {
                 client.on('error', err => {
                     console.error(`Client session error: ${err}`);
                 });
-                const readStream = await getSecureReadStream(client, gracefullJoin(argv.srcFolder, entry.path));
-                const writeStream = createWriteStream(gracefullJoin(argv.trgFolder, entry.path));
+                const readStream = await getSecureReadStream(client, gracefullJoin(argv.srcFolder, entry));
+                const writeStream = createWriteStream(gracefullJoin(argv.trgFolder, entry));
                 await pipe(readStream, writeStream);
                 readStream.close();
                 writeStream.close();
